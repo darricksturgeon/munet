@@ -25,11 +25,17 @@ def parse(serialized):
     return image, label
 
 
-def preprocess(image_batch, label_batch):
-
-
+def batch_preprocess(image_batch, label_batch):
+    shape = [-1, 90, 60, 60]
+    image_batch = tf.reshape(image_batch, shape=shape)
+    image_batch = tf.map_fn(lambda img: preprocess(img), image_batch)
 
     return image_batch, label_batch
+
+
+def preprocess(img):
+
+    return img
 
 
 def input_fn(record_path, train=True, batch_size=32, buffer_size=512):

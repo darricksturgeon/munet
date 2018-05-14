@@ -15,10 +15,11 @@ def cli_interface():
                         help='name of the output record file.')
     parser.add_argument('--inputs', '-i',
                         help='list of paths or text file containing paths to '
-                             'images.')
+                             'input images.')
     parser.add_argument('--labels', '-l', help='label data')
     parser.add_argument('--split', '-s',
-                        help='ratio of train/test data or predetermined split')
+                        help='ratio of train/test data or predetermined split '
+                             '(to be implemented)')
     parser.add_argument('--shuffle', type=bool,
                         help='shuffle inputs before writing to tfrecord.')
 
