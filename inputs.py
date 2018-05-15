@@ -28,14 +28,13 @@ def parse(serialized):
 def batch_preprocess(image_batch, label_batch):
     shape = [-1, 90, 60, 60]
     image_batch = tf.reshape(image_batch, shape=shape)
-    image_batch = tf.map_fn(lambda img: preprocess(img), image_batch)
+    image_batch = tf.map_fn(lambda img: preproc(img), image_batch)
+    image_batch, label_batch = tf.map_fn(
+        lambda img, lab: distort(img, lab),
+        tf.stack(image_batch, label_batch)
+    )
 
     return image_batch, label_batch
-
-
-def preprocess(img):
-
-    return img
 
 
 def input_fn(record_path, train=True, batch_size=32, buffer_size=512):
@@ -80,3 +79,48 @@ def input_fn(record_path, train=True, batch_size=32, buffer_size=512):
 
 def tf_input():
     pass
+
+
+def _random_preprocessing(cfg):
+    # returns preprocessing steps based on configuration.
+
+    def preproc(img):
+        # random contrast
+        tf.random_uniform()
+        # random saturation
+        tf.random_uniform()
+        # random gaussian noise
+        tf.random_normal()
+        # random rician noise
+        # tf.sqrt(tf.random_normal() + tf.random_normal())
+
+        return img
+
+    def distort(img, lab):
+        # random left-right flip and relabel at some rate...
+        img = tf.reverse(img, axis=0)
+        lab = tf.reverse(lab, axis=0)
+        lab = tf.map_fn(
+            lambda x: _fs_lr_map[x],
+        )
+        # random affine boost (mostly scaling)
+
+        # random distortion
+
+        return img, lab
+
+    return preproc, distort
+
+_fs_lr_map = tf.contrib.lookup.HashTable(
+    tf.contrib.lookup.KeyValueTensorInitializer()
+)
+
+config = {
+    'random_contrast': (0.0, 2.0),
+    'random_saturation': (0.0, 2.0),
+    'random_noise': ('some parameter'),
+    'random_flip': 0.5,
+    'affine_parameters': ('twelve degrees of freedom?')
+}
+
+preproc, distort = _random_preprocessing(config)
