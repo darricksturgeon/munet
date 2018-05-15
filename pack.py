@@ -87,7 +87,6 @@ def distort_batch(image_batch: tf.Tensor) -> tf.Tensor:
     shape = [-1, 500, 500, 3]  # @hardcoded Cifar10
     image_batch = tf.reshape(image_batch, shape=shape)
     image_batch = tf.map_fn(lambda img: distort(img), image_batch)
-    image_batch = tf.reshape(image_batch, shape=[-1, np.product(shape[1:])])
 
     return image_batch
 
