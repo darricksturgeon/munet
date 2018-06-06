@@ -2,8 +2,16 @@ import tensorflow as tf
 
 
 def model_fn(features, labels, mode, params):
+    """
+    model function for custom tf Estimator
+    :param features: input training data
+    :param labels: input label data
+    :param mode: tf mode
+    :param params: special input parameters for creating the model
+    :return: tf model graph
+    """
 
-    train = bool(mode)
+    train = (mode == tf.estimator.ModeKeys.TRAIN)
 
     # network architecture
     x = tf.reshape(features['x'], params['shape'])
@@ -43,9 +51,9 @@ def model_fn(features, labels, mode, params):
 
     net = tf.layers.conv3d(net, filters=4, kernel_size=1, padding='full')
 
-    if mode:
+    if mode == tf.estimator.ModeKeys.PREDICT:
         pass
-    elif mode:
+    else:
         pass
 
     return net

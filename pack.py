@@ -8,6 +8,10 @@ import tensorflow as tf
 
 
 def cli_interface():
+    """
+    command line interface for pack.py
+    :return: interface call
+    """
     parser = argparse.ArgumentParser('load niftis and labels into tfrecord '
                                      'format')
 
@@ -30,6 +34,18 @@ def cli_interface():
 
 def interface(record, inputs, labels, split=.5, shuffle=False, save_dims=False,
               **kwargs):
+    """
+    creates a tensorflow record file given lists of niftis for images and
+    labels (segmentations).
+    :param record: name of record file to save to.
+    :param inputs: newline delimited text file of image nifti paths.
+    :param labels: newline delimited text file of label nifti paths.
+    :param split: test/train split (NotYetImplemented)
+    :param shuffle: shuffle inputs or not (NotYetImplemented)
+    :param save_dims: save image dimensions into config file (NotYetImplemented)
+    :param kwargs:
+    :return: None
+    """
 
     with open(inputs) as fd:
         inputs = fd.readlines()
@@ -38,8 +54,7 @@ def interface(record, inputs, labels, split=.5, shuffle=False, save_dims=False,
 
     # get data properties
     if save_dims:
-        #@TODO how to pass this information to tensorflow later?
-        # perhaps a config file for the run...
+        # @TODO save info into a configuration for runtime?
         nii = nibabel.load(inputs[0].strip())
         dims = nii.shape
         header = nii.header
@@ -48,7 +63,13 @@ def interface(record, inputs, labels, split=.5, shuffle=False, save_dims=False,
 
 
 def create_tfrecord_imgsegs(name, inputs, labels):
-    # creates record file assuming labels are also images.
+    """
+    creates tf record file.
+    :param name: filename
+    :param inputs: nifti filename list
+    :param labels: label filename list
+    :return: None
+    """
     if os.path.exists(name):
         os.remove(name)
 
@@ -74,25 +95,8 @@ def create_tfrecord_imgsegs(name, inputs, labels):
             writer.write(example.SerializeToString())
 
 
-def distort(img):
-    img = tf.image.random_hue(img, max_delta=0.05)
-    img = tf.image.random_contrast(img, lower=0.3, upper=1.0)
-    img = tf.image.random_saturation(img, lower=0.0, upper=2.0)
-    img = tf.image.random_flip_left_right(img)
-
-    return img
-
-
-def distort_batch(image_batch: tf.Tensor) -> tf.Tensor:
-    shape = [-1, 500, 500, 3]  # @hardcoded Cifar10
-    image_batch = tf.reshape(image_batch, shape=shape)
-    image_batch = tf.map_fn(lambda img: distort(img), image_batch)
-
-    return image_batch
-
-
 def wrap_bytes(value):
-    # converts raw image data into tf object
+    # converts raw bytes into tf feature which can be packed into tf record
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
